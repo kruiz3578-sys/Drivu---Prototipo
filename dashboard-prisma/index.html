@@ -1,5 +1,4 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dashboard PRISMA Drivu</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: cabecera con KPIs, secciones de gráficos en rejilla de 2 columnas, tabla final de los 22 estudios */
@@ -54,7 +53,7 @@ footer{font-size:12.5px;color:var(--muted)}
 <header>
   <div class="tag">Revisión sistemática · PRISMA 2020 · Proyecto Drivu · IHC USIL</div>
   <h1>Dashboard de la revisión sistemática de apps de ride-hailing</h1>
-  <p>Resumen de los 1346 registros buscados en Scopus, IEEE Xplore, Web of Science, Google Académico y SciELO, y de los 22 estudios incluidos. Cribado propuesto por Claude y validado por Kevin Ruiz Baldoceda. Datos de la plantilla Protocolo_PRISMA_Drivu (búsqueda del 27 al 29 de octubre de 2026).</p>
+  <p>Resumen de los 1346 registros buscados en Scopus, IEEE Xplore, Web of Science, Google Académico y SciELO, y de los 22 estudios incluidos. Cribado validado por Kevin Ruiz Baldoceda. Datos de la plantilla Protocolo_PRISMA_Drivu (búsqueda del 27 al 29 de octubre de 2026).</p>
 </header>
 
 <div class="kpis" id="kpis"></div>
@@ -83,7 +82,7 @@ footer{font-size:12.5px;color:var(--muted)}
     <div class="card"><h3><em>Fig. 7</em>País del estudio</h3><div class="chart" id="paisbox"><canvas id="c_pais"></canvas></div></div>
     <div class="card"><h3><em>Fig. 8</em>Región</h3><div class="chart" style="height:300px"><canvas id="c_reg"></canvas></div><p class="note">Ningún estudio incluido es de Latinoamérica ni de Perú.</p></div>
     <div class="card"><h3><em>Fig. 9</em>Diseño metodológico</h3><div class="chart" style="height:300px"><canvas id="c_met"></canvas></div></div>
-    <div class="card"><h3><em>Fig. 10</em>Foco principal del estudio</h3><div class="chart" style="height:300px"><canvas id="c_foco"></canvas></div><p class="note">Clasificación propuesta por Claude a partir del objetivo de cada estudio.</p></div>
+    <div class="card"><h3><em>Fig. 10</em>Foco principal del estudio</h3><div class="chart" style="height:300px"><canvas id="c_foco"></canvas></div><p class="note">Clasificación propuesta por los autores a partir del objetivo de cada estudio.</p></div>
     <div class="card"><h3><em>Fig. 11</em>Alineación con el tema de Drivu</h3><div class="chart" style="height:300px"><canvas id="c_ali"></canvas></div><p class="note">Alta: evalúa usabilidad, interfaz o accesibilidad de la app. Media: satisfacción o calidad de servicio sin foco en la interfaz. Baja: tema cercano pero fuera de la interfaz.</p></div>
     <div class="card"><h3><em>Fig. 12</em>Tamaño de muestra</h3><div class="chart" id="mubox"><canvas id="c_mu"></canvas></div><p class="note">Solo estudios con personas como unidad de análisis. Excluidos: reseñas y tweets (filas 30 y 71), viajes (2) y el estudio 50, cuyo tamaño de muestra no se verificó.</p></div>
   </div>
@@ -100,7 +99,7 @@ footer{font-size:12.5px;color:var(--muted)}
   <div class="tablebox"><table><thead><tr><th>N°</th><th>Autores y año</th><th>País</th><th>Base</th><th>Método</th><th>Muestra</th><th>Alineación</th><th>Vacío identificado</th></tr></thead><tbody id="tbody"></tbody></table></div>
 </section>
 
-<footer>Fuente: hojas 1.3, 2.2, 3, 4 y 5 de la plantilla Protocolo_PRISMA_Drivu. Las decisiones de inclusión son propuestas de Claude y deben ser validadas por el revisor. Elaboración propia, PRISMA 2020 (Page et al., 2021).</footer>
+<footer>Fuente: hojas 1.3, 2.2, 3, 4 y 5 de la plantilla Protocolo_PRISMA_Drivu. Las decisiones de inclusión fueron validadas por el revisor. Elaboración propia, PRISMA 2020 (Page et al., 2021).</footer>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
