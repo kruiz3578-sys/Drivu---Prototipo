@@ -1,0 +1,177 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dashboard PRISMA Drivu</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: cabecera con KPIs, secciones de gráficos en rejilla de 2 columnas, tabla final de los 22 estudios */
+:root{--bg:#F3F5F8;--card:#FFFFFF;--ink:#17202E;--muted:#5D6B7E;--line:#DCE2EA;--navy:#1F3A5F;--teal:#16828A;--amber:#C98200;--rose:#B0446C;--slate:#7B8798;--sky:#4F7CAC;--hi:#16828A;--mid:#C98200;--lo:#7B8798;--sans:'Public Sans',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:'IBM Plex Mono',ui-monospace,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F1621;--card:#172131;--ink:#E6EBF2;--muted:#9AA7BA;--line:#2A374B;--navy:#7FA6D6;--teal:#4CC0C7;--amber:#E3A93A;--rose:#E07DA3;--slate:#8E9AAD;--sky:#7FA6D6;--hi:#4CC0C7;--mid:#E3A93A;--lo:#8E9AAD;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0F1621;--card:#172131;--ink:#E6EBF2;--muted:#9AA7BA;--line:#2A374B;--navy:#7FA6D6;--teal:#4CC0C7;--amber:#E3A93A;--rose:#E07DA3;--slate:#8E9AAD;--sky:#7FA6D6;--hi:#4CC0C7;--mid:#E3A93A;--lo:#8E9AAD;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;padding-block:28px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+header h1{font-size:clamp(24px,4vw,34px);line-height:1.15;margin:0 0 6px;letter-spacing:-.01em;text-wrap:balance}
+header p{margin:0;color:var(--muted);max-width:70ch}
+.tag{font-family:var(--mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
+.kpi b{display:block;font-family:var(--mono);font-size:30px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--navy);line-height:1.1}
+.kpi span{font-size:13px;color:var(--muted)}
+.kpi.main b{color:var(--teal)}
+section{display:flex;flex-direction:column;gap:12px}
+section>h2{font-size:18px;margin:0;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+section>h2 small{font-weight:400;color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:760px){.grid{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0;display:flex;flex-direction:column;gap:8px}
+.card.wide{grid-column:1/-1}
+.card h3{margin:0;font-size:15px;font-weight:600}
+.card h3 em{font-style:normal;font-family:var(--mono);font-size:12px;color:var(--muted);margin-right:8px;letter-spacing:.03em}
+.card p.note{margin:0;font-size:12.5px;color:var(--muted)}
+.chart{position:relative;width:100%}
+.chart canvas{max-width:100%}
+.gaps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.gap{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
+.gap b{display:block;font-size:15px;margin-bottom:4px}
+.gap span{font-size:13.5px;color:var(--muted)}
+.gap .n{font-family:var(--mono);color:var(--teal);font-size:22px;display:block;margin-bottom:2px}
+.filters{display:flex;gap:8px;flex-wrap:wrap}
+.filters button{font:inherit;font-size:13px;padding:5px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--navy);color:var(--bg);border-color:var(--navy)}
+.filters button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.tablebox{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:900px;font-size:13px}
+th,td{padding:9px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600;position:sticky;top:0;background:var(--card)}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.pill{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:600;color:#fff}
+.pill.Alta{background:var(--hi)}.pill.Media{background:var(--mid)}.pill.Baja{background:var(--lo)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .pill{color:#0F1621}}
+:root[data-theme="dark"] .pill{color:#0F1621}
+footer{font-size:12.5px;color:var(--muted)}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="tag">Revisión sistemática · PRISMA 2020 · Proyecto Drivu · IHC USIL</div>
+  <h1>Dashboard de la revisión sistemática de apps de ride-hailing</h1>
+  <p>Resumen de los 1346 registros buscados en Scopus, IEEE Xplore, Web of Science, Google Académico y SciELO, y de los 22 estudios incluidos. Cribado propuesto por Claude y validado por Kevin Ruiz Baldoceda. Datos de la plantilla Protocolo_PRISMA_Drivu (búsqueda del 27 al 29 de octubre de 2026).</p>
+</header>
+
+<div class="kpis" id="kpis"></div>
+
+<section>
+  <h2>1. Flujo de selección <small>de dónde salen los 22 estudios</small></h2>
+  <div class="grid">
+    <div class="card"><h3><em>Fig. 1</em>Embudo PRISMA</h3><div class="chart" style="height:280px"><canvas id="c_funnel"></canvas></div><p class="note">Del total identificado, el 1,6 % llega a la síntesis.</p></div>
+    <div class="card"><h3><em>Fig. 2</em>Motivos de exclusión</h3><div class="chart" style="height:280px"><canvas id="c_excl"></canvas></div><p class="note">Cribado por título y resumen (819) y revisión de texto completo (101, de los cuales 96 por falta de acceso libre, criterio E5).</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>2. Procedencia <small>repositorio, año y editorial</small></h2>
+  <div class="grid">
+    <div class="card"><h3><em>Fig. 3</em>Registros por base de datos</h3><div class="chart" style="height:260px"><canvas id="c_db"></canvas></div><p class="note">Registros identificados por base (total 1346). SciELO no devolvió resultados con los filtros definidos.</p></div>
+    <div class="card"><h3><em>Fig. 4</em>Estudios incluidos por base de datos</h3><div class="chart" style="height:260px"><canvas id="c_dbinc"></canvas></div></div>
+    <div class="card wide"><h3><em>Fig. 5</em>Publicación por año</h3><div class="chart" style="height:280px"><canvas id="c_year"></canvas></div><p class="note">Registros identificados (2015–2026) y estudios incluidos por año de publicación.</p></div>
+    <div class="card wide"><h3><em>Fig. 6</em>Estudios incluidos por editorial</h3><div class="chart" id="pubbox"><canvas id="c_pub"></canvas></div></div>
+  </div>
+</section>
+
+<section>
+  <h2>3. Qué estudian <small>países, método y foco</small></h2>
+  <div class="grid">
+    <div class="card"><h3><em>Fig. 7</em>País del estudio</h3><div class="chart" id="paisbox"><canvas id="c_pais"></canvas></div></div>
+    <div class="card"><h3><em>Fig. 8</em>Región</h3><div class="chart" style="height:300px"><canvas id="c_reg"></canvas></div><p class="note">Ningún estudio incluido es de Latinoamérica ni de Perú.</p></div>
+    <div class="card"><h3><em>Fig. 9</em>Diseño metodológico</h3><div class="chart" style="height:300px"><canvas id="c_met"></canvas></div></div>
+    <div class="card"><h3><em>Fig. 10</em>Foco principal del estudio</h3><div class="chart" style="height:300px"><canvas id="c_foco"></canvas></div><p class="note">Clasificación propuesta por Claude a partir del objetivo de cada estudio.</p></div>
+    <div class="card"><h3><em>Fig. 11</em>Alineación con el tema de Drivu</h3><div class="chart" style="height:300px"><canvas id="c_ali"></canvas></div><p class="note">Alta: evalúa usabilidad, interfaz o accesibilidad de la app. Media: satisfacción o calidad de servicio sin foco en la interfaz. Baja: tema cercano pero fuera de la interfaz.</p></div>
+    <div class="card"><h3><em>Fig. 12</em>Tamaño de muestra</h3><div class="chart" id="mubox"><canvas id="c_mu"></canvas></div><p class="note">Solo estudios con personas como unidad de análisis. Excluidos: reseñas y tweets (filas 30 y 71), viajes (2) y el estudio 50, cuyo tamaño de muestra no se verificó.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>4. Vacíos y oportunidad para Drivu <small>lo que muestran los 22 estudios</small></h2>
+  <div class="gaps" id="gaps"></div>
+</section>
+
+<section>
+  <h2>5. Los 22 estudios incluidos</h2>
+  <div class="filters" id="filters"></div>
+  <div class="tablebox"><table><thead><tr><th>N°</th><th>Autores y año</th><th>País</th><th>Base</th><th>Método</th><th>Muestra</th><th>Alineación</th><th>Vacío identificado</th></tr></thead><tbody id="tbody"></tbody></table></div>
+</section>
+
+<footer>Fuente: hojas 1.3, 2.2, 3, 4 y 5 de la plantilla Protocolo_PRISMA_Drivu. Las decisiones de inclusión son propuestas de Claude y deben ser validadas por el revisor. Elaboración propia, PRISMA 2020 (Page et al., 2021).</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const INC=[{"n": 1, "autores": "Abdul-Karim N.; Adumpo E.A.; Akaateba M.A.", "titulo": "From occasional to everyday: Understanding usage frequency and user experiences of online ride-hailing in Accra, Ghana", "anio": 2026, "revista": "African Transport Studies", "editorial": "Elsevier", "doi": "10.1016/j.aftran.2026.100083", "pais": "Ghana", "base": "Scopus", "metodologia": "Cuantitativo (encuesta en línea; estadística descriptiva y regresión logística binaria)", "muestra": "513 respondentes", "vacios": "Sesgo de muestra (en línea, más jóvenes y digitales); datos autorreportados; sin datos de las empresas", "alineacion": "Media"}, {"n": 2, "autores": "Piracha A.; Connelly K.; Ben J.; ... ; Elias A.; Rouillard S.", "titulo": "Racialised rider experiences in Uber: Evidence from an audit-based field study", "anio": 2026, "revista": "Cities", "editorial": "Elsevier", "doi": "10.1016/j.cities.2026.107607", "pais": "Australia", "base": "Scopus", "metodologia": "Cuantitativo/mixto (estudio de campo tipo auditoría con observación)", "muestra": "447 viajes con ficha completa (de 450)", "vacios": "Exploratorio, sin preregistro; indicadores perceptivos; grupos no emparejados por edad ni género", "alineacion": "Media"}, {"n": 4, "autores": "Brady S.A.; Grevstad N.; Schliemann S.A.; Glatthar C.", "titulo": "Transportation, ride-hailing and discrimination among the blind and low vision community", "anio": 2026, "revista": "Transportation Research Interdisciplinary Perspectives", "editorial": "Elsevier", "doi": "10.1016/j.trip.2026.101837", "pais": "Estados Unidos", "base": "Scopus", "metodologia": "Cuantitativo (encuesta en línea; primera fase de un estudio mixto)", "muestra": "300 respondentes; 272 usuarios de ride-hailing", "vacios": "Es la primera parte de un estudio mixto; la fase cualitativa queda fuera de este artículo", "alineacion": "Alta"}, {"n": 10, "autores": "Yusra Y.; Ariffin A.A.M.; Susanto P.; ... ; Sijabat F.N.; Caraka R.E.", "titulo": "Linking platform interaction quality to brand loyalty through brand love: an empirical study in the car e-hailing context", "anio": 2026, "revista": "Cogent Business and Management", "editorial": "Taylor & Francis (Informa UK)", "doi": "10.1080/23311975.2026.2698778", "pais": "Indonesia", "base": "Scopus", "metodologia": "Cuantitativo (PLS-SEM, teoría S-O-R)", "muestra": "240 respuestas válidas", "vacios": "Una sola marca y región (Gran Yakarta)", "alineacion": "Alta"}, {"n": 11, "autores": "Vu T.D.; Nguyen B.K.; Vu P.T.; Nguyen T.M.N.; Hoang C.C.", "titulo": "Promoting customer satisfaction and reuse intention using ride-hailing taxi services: role of consumer perceived value, personal innovativeness and corporate image", "anio": 2025, "revista": "Asia Pacific Journal of Business Administration", "editorial": "Emerald Publishing", "doi": "10.1108/APJBA-11-2023-0570", "pais": "Vietnam", "base": "Scopus", "metodologia": "Cuantitativo (PLS-SEM)", "muestra": "388 válidos (402 respuestas)", "vacios": "Extracción desde el PDF; vacíos/recomendaciones pendientes de verificar en el texto completo.", "alineacion": "Media"}, {"n": 12, "autores": "Ariyanti O.; Sampaio D.; Bailey A.", "titulo": "Older adults' experiences with app-based ride-hailing in Indonesia: At the intersection of health, gender, digital literacy, and affordability", "anio": 2025, "revista": "Journal of Transport and Health", "editorial": "Elsevier", "doi": "10.1016/j.jth.2025.102134", "pais": "Indonesia", "base": "Scopus", "metodologia": "Cualitativo (entrevistas semiestructuradas)", "muestra": "28 entrevistas", "vacios": "Extracción desde el PDF; vacíos/recomendaciones pendientes de verificar en el texto completo.", "alineacion": "Alta"}, {"n": 20, "autores": "Kurniawan P.; Achjari D.", "titulo": "Assessing user preferences and competitive strategies of Gojek and Grab in ASEAN's ride-hailing market", "anio": 2025, "revista": "Innovative Marketing", "editorial": "Business Perspectives (LLC \"Consulting Publishing Company\")", "doi": "10.21511/im.21(1).2025.01", "pais": "Indonesia, Tailandia, Vietnam y Singapur (ASEAN)", "base": "Scopus", "metodologia": "Cuantitativo (AHP con comparación pareada)", "muestra": "377 usuarios", "vacios": "Extracción desde el PDF; vacíos/recomendaciones pendientes de verificar en el texto completo.", "alineacion": "Alta"}, {"n": 30, "autores": "Pranatawijaya V.H.; Sari N.N.K.; Rahman R.A.; Christian E.; Geges S.", "titulo": "Unveiling User Sentiment: Aspect-Based Analysis and Topic Modeling of Ride-Hailing and Google Play App Reviews", "anio": 2024, "revista": "Journal of Information Systems Engineering and Business Intelligence", "editorial": "Universitas Airlangga", "doi": "10.20473/jisebi.10.3.328-339", "pais": "Indonesia", "base": "Scopus", "metodologia": "Cuantitativo (minería de texto: ABSA con BERT + modelado de temas LDA)", "muestra": "14.147 reseñas de Gojek (2020–2023) y 16.206 de Google Play tras anotación", "vacios": "Extracción desde el PDF; vacíos/recomendaciones pendientes de verificar en el texto completo.", "alineacion": "Alta"}, {"n": 36, "autores": "Wireko-Gyebi S.; Baah N.G.; Nustugbodo R.Y.; ... ; Bosomefi V.; Amankona S.", "titulo": "Service quality, satisfaction and loyalty among sharing economy vehicle users", "anio": 2024, "revista": "Cogent Social Sciences", "editorial": "Taylor & Francis (Informa UK)", "doi": "10.1080/23311886.2024.2327130", "pais": "Ghana", "base": "Scopus", "metodologia": "Cuantitativo (encuesta transversal; SEM)", "muestra": "436 (de 750 abordados)", "vacios": "Extracción desde el PDF; vacíos/recomendaciones pendientes de verificar en el texto completo.", "alineacion": "Media"}, {"n": 37, "autores": "Adenigbo A.J.; Mageto J.; Makan H.; Luke R.", "titulo": "Service quality of e-hailing taxi services in Johannesburg", "anio": 2023, "revista": "Acta Logistica", "editorial": "Technical University of Košice", "doi": "10.22306/al.v10i4.429", "pais": "Sudáfrica", "base": "Scopus", "metodologia": "Cuantitativo (EFA y regresión)", "muestra": "499 usuarios", "vacios": "Extracción desde el PDF; vacíos/recomendaciones pendientes de verificar en el texto completo.", "alineacion": "Media"}, {"n": 39, "autores": "Gebresselassie M.", "titulo": "Wheelchair Users’ Perspective on Transportation Service Hailed Through Uber and Lyft Apps", "anio": 2023, "revista": "Transportation Research Record", "editorial": "SAGE Publications", "doi": "10.1177/03611981221140369", "pais": "Estados Unidos", "base": "Scopus", "metodologia": "Cuantitativo (encuesta; estadística descriptiva y regresión lineal/logística)", "muestra": "341 (224 completas)", "vacios": "Extracción desde el PDF; vacíos/recomendaciones pendientes de verificar en el texto completo.", "alineacion": "Alta"}, {"n": 50, "autores": "Ali N.; Javid M.A.; Campisi T.; Chaiyasarn K.; Saingam P.", "titulo": "Measuring Customers’ Satisfaction and Preferences for Ride-Hailing Services in a Developing Country", "anio": 2022, "revista": "Sustainability Switzerland", "editorial": "MDPI", "doi": "10.3390/su142215484", "pais": "Pakistán", "base": "Scopus", "metodologia": "Cuantitativo (encuesta; Índice de Satisfacción del Cliente, CSI)", "muestra": "No verificado en la lectura (revisar en el PDF)", "vacios": "Extracción desde el PDF; vacíos/recomendaciones pendientes de verificar en el texto completo.", "alineacion": "Media"}, {"n": 53, "autores": "Li G.; Zhang R.; Guo S.; Zhang J.", "titulo": "Analysis of Ride-Hailing Passenger Satisfaction and Life Satisfaction Based on a MIMIC Model", "anio": 2022, "revista": "Sustainability Switzerland", "editorial": "MDPI", "doi": "10.3390/su141710954", "pais": "China", "base": "Scopus", "metodologia": "Cuantitativo (modelo MIMIC; comparación express vs hitch)", "muestra": "2.158 distribuidos; 1.362 válidos (express) y 1.031 (hitch)", "vacios": "Extracción desde el PDF; vacíos/recomendaciones pendientes de verificar en el texto completo.", "alineacion": "Media"}, {"n": 65, "autores": "Thaithatkul P.; Anuchitchanchai O.; Srisurin P.; Sanghatawatana P.; Chalermpong S.", "titulo": "Ride-Hailing Applications in Bangkok: Determining Service Quality, Passenger Satisfaction, and Loyalty", "anio": 2021, "revista": "International Journal of Technology", "editorial": "Universitas Indonesia (Faculty of Engineering)", "doi": "10.14716/ijtech.v12i5.5247", "pais": "Tailandia", "base": "Scopus", "metodologia": "Cuantitativo (SERVQUAL extendido; SEM en Amos)", "muestra": "310 (de 359 encuestados tras retirar 49 atípicos)", "vacios": "Una sola ciudad, muestra joven y mayoritariamente femenina, mercado poco competitivo", "alineacion": "Media"}, {"n": 68, "autores": "Ferdinant P.F.; Wahyuni N.", "titulo": "Perception of taxi online service users towards women drivers based on Kano models", "anio": 2019, "revista": "Iop Conference Series Materials Science and Engineering", "editorial": "IOP Publishing", "doi": "10.1088/1757-899X/673/1/012100", "pais": "Indonesia", "base": "Scopus", "metodologia": "Cuantitativo (modelo de Kano)", "muestra": "133 (mínimo calculado 107)", "vacios": "Muestra pequeña; no evalúa la interfaz de la app", "alineacion": "Baja"}, {"n": 71, "autores": "Surjandari I.; Wayasti R.A.; Laoh E.; ... ; Rus A.M.M.; Prawiradinata I.", "titulo": "Mining public opinion on ride-hailing service providers using aspect-based sentiment analysis", "anio": 2019, "revista": "International Journal of Technology", "editorial": "Universitas Indonesia (Faculty of Engineering)", "doi": "10.14716/ijtech.v10i4.2860", "pais": "Indonesia", "base": "Scopus", "metodologia": "Cuantitativo (minería de texto: LDA + SVM; Net Reputation Score)", "muestra": "Tweets de 3 proveedores (1.283, 1.632 y 710 clasificados)", "vacios": "Solo Twitter, en indonesio; preprocesamiento limitado", "alineacion": "Media"}, {"n": 72, "autores": "Lee S.; Hubert-Wallander B.; Stevens M.; Carroll J.M.", "titulo": "Understanding and designing for deaf or hard of hearing drivers on uber", "anio": 2019, "revista": "Conference on Human Factors in Computing Systems Proceedings", "editorial": "ACM (Association for Computing Machinery)", "doi": "10.1145/3290605.3300759", "pais": "Estados Unidos", "base": "Scopus", "metodologia": "Cualitativo (análisis de contenido + entrevistas)", "muestra": "5 entrevistas; 230 tuits de pasajeros", "vacios": "Perspectiva de conductores, no de pasajeros; muestra de entrevistas pequeña", "alineacion": "Media"}, {"n": 98, "autores": "Nguyen, HK; Hoang, TDL", "titulo": "Customer behavioral intentions in accepting technology-based ride-hailing service: Empirical study from Vietnam", "anio": 2022, "revista": "Management & Marketing", "editorial": "Sciendo", "doi": "10.2478/mmcks-2022-0015", "pais": "Vietnam", "base": "Web of Science", "metodologia": "Cuantitativo (modelo integrado)", "muestra": "237 usables (de 252)", "vacios": "Extracción desde el PDF; vacíos/recomendaciones pendientes de verificar en el texto completo.", "alineacion": "Media"}, {"n": 100, "autores": "Li, J; Xu, XM; Xu, H; Song, YL", "titulo": "Measuring customer-perceived service quality in the ride-hailing industry: a generic approach for the development and validation of a multidimensional scale", "anio": 2025, "revista": "Humanities & Social Sciences Communications", "editorial": "Springernature", "doi": "10.1057/s41599-025-05902-9", "pais": "China", "base": "Web of Science", "metodologia": "Mixto (teoría fundamentada con grupos focales; EFA, CFA y CFA multigrupo)", "muestra": "1.464 usuarios", "vacios": "Un solo contexto (Suzhou)", "alineacion": "Media"}, {"n": 109, "autores": "C Jing, J Zhi, S Yang, W Wang", "titulo": "Impact of driver age and experience in software usage on driving safety and usability of car‐sharing software", "anio": 2021, "revista": "Journal of advanced …", "editorial": "Wiley Online Library", "doi": "10.1155/2021/6633379", "pais": "China", "base": "Google Scholar", "metodologia": "Experimental (simulador de conducción; ANOVA de dos vías y Kruskal–Wallis)", "muestra": "48 conductores en 4 grupos", "vacios": "Extracción desde el PDF; vacíos/recomendaciones pendientes de verificar en el texto completo.", "alineacion": "Alta"}, {"n": 113, "autores": "M Gilibert Junyent, I Ribas Vila", "titulo": "Main design factors for shared ride-hailing services from a user perspective", "anio": 2019, "revista": "International Journal of …", "editorial": "upcommons.upc.edu", "doi": "10.2495/TDI-V3-N3-195-206", "pais": "España", "base": "Google Scholar", "metodologia": "Cuantitativo (estudio de caso con piloto de 1 semana)", "muestra": "67 voluntarios; 55 respuestas", "vacios": "Piloto de una semana, muestra pequeña", "alineacion": "Baja"}, {"n": 115, "autores": "R Jin, K Chen", "titulo": "Impact of value cocreation on customer satisfaction and loyalty of online car-hailing services", "anio": 2020, "revista": "Journal of theoretical and applied electronic commerce …", "editorial": "mdpi.com", "doi": "10.3390/jtaer16030027", "pais": "China", "base": "Google Scholar", "metodologia": "Cuantitativo (encuesta)", "muestra": "338 válidos (356 recuperados)", "vacios": "Extracción desde el PDF; vacíos/recomendaciones pendientes de verificar en el texto completo.", "alineacion": "Alta"}];
+const FOCO={36:'Satisfacción y calidad de servicio',37:'Satisfacción y calidad de servicio',50:'Satisfacción y calidad de servicio',53:'Satisfacción y calidad de servicio',65:'Satisfacción y calidad de servicio',68:'Satisfacción y calidad de servicio',100:'Satisfacción y calidad de servicio',115:'Satisfacción y calidad de servicio',11:'Satisfacción y calidad de servicio',98:'Satisfacción y calidad de servicio',4:'Accesibilidad e inclusión',12:'Accesibilidad e inclusión',39:'Accesibilidad e inclusión',72:'Accesibilidad e inclusión',10:'Usabilidad e interfaz de la app',109:'Usabilidad e interfaz de la app',30:'Opiniones en redes y reseñas',71:'Opiniones en redes y reseñas',1:'Experiencia del usuario y equidad',2:'Experiencia del usuario y equidad',20:'Preferencias y comparación de plataformas',113:'Preferencias y comparación de plataformas'};
+const MET={30:'Minería de texto',71:'Minería de texto',12:'Cualitativo',72:'Cualitativo',2:'Campo / experimental',109:'Campo / experimental',100:'Mixto'};
+const REG={'Indonesia':'Asia','China':'Asia','Vietnam':'Asia','Pakistán':'Asia','Tailandia':'Asia','Indonesia, Tailandia, Vietnam y Singapur (ASEAN)':'Asia','Estados Unidos':'América del Norte','Ghana':'África','Sudáfrica':'África','España':'Europa','Australia':'Oceanía'};
+const MU={1:513,4:300,10:240,11:388,12:28,20:377,36:436,37:499,39:341,53:2393,65:310,68:133,72:5,98:237,100:1464,109:48,113:55,115:338};
+const IDYEAR={2015:12,2016:23,2017:34,2018:64,2019:99,2020:101,2021:146,2022:151,2023:122,2024:146,2025:221,2026:225};
+const PUBN=e=>{const l=e.toLowerCase();if(l.includes('mdpi'))return 'MDPI';if(l.includes('upc.edu')||l.includes('wit'))return 'WIT Press';if(l.includes('wiley')||l.includes('hindawi'))return 'Hindawi (Wiley)';if(l.includes('springer'))return 'Springer Nature';if(l.includes('elsevier'))return 'Elsevier';if(l.includes('taylor'))return 'Taylor & Francis';if(l.includes('sage'))return 'SAGE';if(l.includes('sciendo'))return 'Sciendo';return e||'No indicada'};
+const PEND='Pendiente de verificar en el texto completo.';
+INC.forEach(s=>{s.n=+s.n;s.anio=+s.anio;s.foco=FOCO[s.n];s.met=MET[s.n]||'Encuesta cuantitativa';s.region=REG[s.pais];if(s.pais.startsWith('Indonesia, Tailandia'))s.pais='ASEAN (4 países)';s.pub=PUBN((s.editorial||'').replace(/ \(.*\)$/,''))});
+const count=(arr,f)=>{const m={};arr.forEach(x=>{const k=f(x);m[k]=(m[k]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1])};
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+let charts=[];
+function mk(id,cfg){const c=new Chart(document.getElementById(id),cfg);charts.push(c);return c}
+function build(){
+ charts.forEach(c=>c.destroy());charts=[];
+ const ink=css('--ink'),muted=css('--muted'),line=css('--line'),navy=css('--navy'),teal=css('--teal'),amber=css('--amber'),rose=css('--rose'),slate=css('--slate'),sky=css('--sky');
+ Chart.defaults.font.family=css('--sans');Chart.defaults.color=muted;Chart.defaults.borderColor=line;
+ const base={responsive:true,maintainAspectRatio:false,layout:{padding:{right:44}},plugins:{legend:{display:false}}};
+ const hbar=(id,labels,data,color,extra={})=>mk(id,{type:'bar',data:{labels,datasets:[{data,backgroundColor:color,borderRadius:3,barThickness:extra.thick||18}]},options:{...base,indexAxis:'y',scales:{x:{grid:{color:line},ticks:{precision:0}},y:{grid:{display:false},ticks:{color:ink}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.parsed.x.toLocaleString('es-PE')}}}}});
+ const lab={id:'lab',afterDatasetsDraw(ch,_a,o){if(ch.config.options.indexAxis!=='y')return;const {ctx}=ch;ctx.save();ctx.fillStyle=ink;ctx.font='12px '+css('--mono');ctx.textBaseline='middle';ch.getDatasetMeta(0).data.forEach((b,i)=>{const v=ch.data.datasets[0].data[i];ctx.fillText(v.toLocaleString('es-PE'),b.x+6,b.y)});ctx.restore()}};
+ Chart.register(lab);
+ // Fig 1
+ hbar('c_funnel',['Identificados','Únicos','Texto buscado','Evaluados','Incluidos'],[1346,942,123,27,22],[navy,navy,sky,sky,teal],{thick:24});
+ // Fig 2
+ mk('c_excl',{type:'bar',data:{labels:['No evalúa UX/satisf.','Fuera de tema','Solo conductor','Reparto/bicicletas','Revisión','Sin acceso (E5)','Otros (texto)'],datasets:[{data:[422,237,91,46,23,96,5],backgroundColor:[slate,slate,slate,slate,slate,amber,rose],borderRadius:3,barThickness:18}]},options:{...base,indexAxis:'y',scales:{x:{grid:{color:line}},y:{grid:{display:false},ticks:{color:ink,font:{size:11}}}}}});
+ // Fig 3
+ mk('c_db',{type:'bar',data:{labels:['Scopus','Web of Science','IEEE Xplore','Google Académico','SciELO'],datasets:[{label:'Identificados',data:[629,439,178,100,0],backgroundColor:navy,borderRadius:3}]},options:{...base,scales:{y:{grid:{color:line}},x:{grid:{display:false},ticks:{color:ink}}}}});
+ const di=count(INC,s=>s.base);
+ mk('c_dbinc',{type:'doughnut',data:{labels:di.map(x=>x[0]),datasets:[{data:di.map(x=>x[1]),backgroundColor:[navy,teal,amber],borderColor:css('--card'),borderWidth:2}]},options:{...base,cutout:'58%',plugins:{legend:{display:true,position:'bottom',labels:{color:ink,boxWidth:12}}}}});
+ // Fig 5
+ const yrs=Object.keys(IDYEAR);const incy=yrs.map(y=>INC.filter(s=>s.anio==y).length);
+ mk('c_year',{type:'bar',data:{labels:yrs,datasets:[{type:'bar',label:'Identificados',data:yrs.map(y=>IDYEAR[y]),backgroundColor:sky,borderRadius:3,yAxisID:'y'},{type:'line',label:'Incluidos',data:incy,borderColor:teal,backgroundColor:teal,pointRadius:4,tension:0,yAxisID:'y2'}]},options:{...base,plugins:{legend:{display:true,position:'bottom',labels:{color:ink,boxWidth:12}}},scales:{y:{grid:{color:line},title:{display:true,text:'Identificados'}},y2:{position:'right',grid:{display:false},title:{display:true,text:'Incluidos'},ticks:{precision:0},suggestedMax:6},x:{grid:{display:false}}}}});
+ // Fig 6
+ const pb=count(INC,s=>s.pub);document.getElementById('pubbox').style.height=(pb.length*26+40)+'px';
+ hbar('c_pub',pb.map(x=>x[0]),pb.map(x=>x[1]),navy,{thick:16});
+ // Fig 7
+ const pa=count(INC,s=>s.pais);document.getElementById('paisbox').style.height=(pa.length*26+40)+'px';
+ hbar('c_pais',pa.map(x=>x[0]),pa.map(x=>x[1]),teal,{thick:16});
+ const rg=count(INC,s=>s.region);
+ mk('c_reg',{type:'doughnut',data:{labels:rg.map(x=>x[0]),datasets:[{data:rg.map(x=>x[1]),backgroundColor:[navy,teal,amber,rose,slate],borderColor:css('--card'),borderWidth:2}]},options:{...base,cutout:'55%',plugins:{legend:{display:true,position:'bottom',labels:{color:ink,boxWidth:12}}}}});
+ const me=count(INC,s=>s.met);hbar('c_met',me.map(x=>x[0]),me.map(x=>x[1]),sky);
+ const fo=count(INC,s=>s.foco);hbar('c_foco',fo.map(x=>x[0]),fo.map(x=>x[1]),navy,{thick:16});
+ const al=['Alta','Media','Baja'].map(k=>INC.filter(s=>s.alineacion===k).length);
+ mk('c_ali',{type:'doughnut',data:{labels:['Alta','Media','Baja'],datasets:[{data:al,backgroundColor:[teal,amber,slate],borderColor:css('--card'),borderWidth:2}]},options:{...base,cutout:'58%',plugins:{legend:{display:true,position:'bottom',labels:{color:ink,boxWidth:12}}}}});
+ const mu=INC.filter(s=>MU[s.n]).sort((a,b)=>MU[b.n]-MU[a.n]);document.getElementById('mubox').style.height=(mu.length*24+40)+'px';
+ hbar('c_mu',mu.map(s=>'N° '+s.n+' · '+s.autores.split(/[;,]/)[0].replace(/ [A-Z]\.?$/,'')+' '+s.anio),mu.map(s=>MU[s.n]),amber,{thick:14});
+}
+// KPIs
+const kp=[['1346','registros identificados'],['404','duplicados eliminados'],['942','cribados por título y resumen'],['123','textos completos buscados'],['27','textos evaluados'],['22','estudios incluidos',1]];
+document.getElementById('kpis').innerHTML=kp.map(k=>`<div class="kpi${k[2]?' main':''}"><b>${k[0]}</b><span>${k[1]}</span></div>`).join('');
+// Gaps
+const nAlta=INC.filter(s=>s.alineacion==='Alta').length;
+const gp=[[`0 de 22`,'Estudios de Latinoamérica o Perú','Las regiones cubiertas son Asia (14), América del Norte (3), África (3), Europa (1) y Oceanía (1). Drivu se evalúa en Lima, un contexto sin evidencia en esta revisión.'],
+[`${INC.filter(s=>s.foco==='Usabilidad e interfaz de la app').length} de 22`,'Evalúan la interfaz de la app directamente','Predomina la satisfacción y la calidad de servicio medidas por encuesta. Pocos estudios miden usabilidad o interfaz con tareas o pruebas.'],
+['0 de 22','Mencionan InDrive o Uber Simple','En los textos revisados no aparece InDrive ni el modo Uber Simple como objeto de estudio, que son dos de las tres comparaciones del artículo.'],
+[`${INC.filter(s=>s.foco==='Accesibilidad e inclusión').length} de 22`,'Estudian accesibilidad','Cubren personas ciegas, usuarios de silla de ruedas, conductores sordos y adultos mayores. Es el terreno donde una interfaz adaptativa aporta más.']];
+document.getElementById('gaps').innerHTML=gp.map(g=>`<div class="gap"><span class="n">${g[0]}</span><b>${g[1]}</b><span>${g[2]}</span></div>`).join('');
+// Table
+let filt='Todas';
+function row(s){const v=(s.vacios&&!s.vacios.startsWith('Extracción desde el PDF'))?s.vacios:'<span style="color:var(--muted)">Pendiente de extraer</span>';const au=s.autores.split(';')[0].replace(/,$/,'')+(s.autores.includes(';')?' et al.':'');return `<tr><td class="num">${s.n}</td><td><b>${au}</b> (${s.anio})<br><span style="color:var(--muted)">${s.revista}</span></td><td>${s.pais}</td><td>${s.base}</td><td>${s.met}</td><td class="num">${s.muestra}</td><td><span class="pill ${s.alineacion}">${s.alineacion}</span></td><td>${v}</td></tr>`}
+function renderT(){document.getElementById('tbody').innerHTML=INC.filter(s=>filt==='Todas'||s.alineacion===filt).map(row).join('');document.querySelectorAll('#filters button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.f===filt))}
+document.getElementById('filters').innerHTML=['Todas','Alta','Media','Baja'].map(f=>`<button type="button" data-f="${f}" aria-pressed="false">${f==='Todas'?'Todas':'Alineación '+f.toLowerCase()}</button>`).join('');
+document.getElementById('filters').addEventListener('click',e=>{const b=e.target.closest('button');if(b){filt=b.dataset.f;renderT()}});
+renderT();
+function start(){build()}
+if(document.fonts&&document.fonts.ready){document.fonts.ready.then(start)}else{start()}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',build);
+new MutationObserver(build).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+</script>
+</html>
